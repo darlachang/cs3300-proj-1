@@ -55,9 +55,9 @@ function showTrend(data){
 					.domain([200,102000])
 					.range([0,10]);
 
-	var colors = ["#ccc","#C36A4D","#CD5551","#B6478B","#B650CD","#7D4AC3"]
+	var colors = ["#ccc","#C36A4D","#CD5551","#B6478B","#B650CD","#7D4AC3","#C9A2CD"]
 	var gdpColor = d3.scaleOrdinal()
-					.domain([NaN,2,4,6,8,10])
+					.domain([NaN,0,2,4,6,8,10])
 					.range(colors);
 
 	var xAxis = d3.axisBottom().scale(popScale);
