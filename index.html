@@ -13,13 +13,13 @@ svg { border: solid #ccc 1px; }
 <body>
 <div>
 
-<svg height="800" width="800">
+<svg height="900" width="900">
 </svg>
 
 <script>
-var height = 800;
-var width = 800;
-var padding = {left:20, right: 20, top:20, bottom:20};
+var height = 900;
+var width = 900;
+var padding = {left:20, right: 80, top:80, bottom:20};
 var svg = d3.select("svg");
 var countryData;
 
@@ -31,11 +31,13 @@ d3.tsv("country.tsv", function (error, data) {
 		country = d.Country;
 		population = d.pop2015;
 		size = d.landSqMi;
+		best = d.numOneFor;
 		gdp = d.GDPperCapita;
 		return {"name":country, 
 		"population": population,
 		"size": size,
-		"gdp": gdp };
+		"gdp": gdp,
+		"best": best };
 	});
 	console.log("countryData",countryData);
 	showTrend(countryData);
@@ -87,14 +89,22 @@ function showTrend(data){
 	.attr("y", sizeScale(data[i].size))
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].name)
+	.style("font-size","11px")
 	.style("fill", gdpColor(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2))); //round up to next even number
+
+
+	svg.append("text")
+	.attr("x", popScale(data[i].population))
+	.attr("y", sizeScale(data[i].size)-7)
+	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+	.text(data[i].best)
+	.style("font-size","11px")
+	.style("fill", gdpColor(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2)));
+
+
 
 	}
 }
-
-
-
-
 </script>
 
 
