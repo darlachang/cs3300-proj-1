@@ -1,0 +1,103 @@
+<html>
+<head>
+<title>Project1</title>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+<style>
+
+svg { border: solid #ccc 1px; }
+
+</style>
+</head>
+<body>
+<div>
+
+<svg height="800" width="800">
+</svg>
+
+<script>
+var height = 800;
+var width = 800;
+var padding = {left:20, right: 20, top:20, bottom:20};
+var svg = d3.select("svg");
+var countryData;
+
+
+d3.tsv("country.tsv", function (error, data) {
+	if(error) { console.log(error);}
+	console.log("csv")
+	countryData = data.map(function(d){
+		country = d.Country;
+		population = d.pop2015;
+		size = d.landSqMi;
+		gdp = d.GDPperCapita;
+		return {"name":country, 
+		"population": population,
+		"size": size,
+		"gdp": gdp };
+	});
+	console.log("countryData",countryData);
+	showTrend(countryData);
+
+});
+
+
+function showTrend(data){
+
+	var popScale = d3.scaleLog().domain([1,1500000]).range([0, width - padding.left - padding.right]);
+	var sizeScale = d3.scaleLog()
+					.domain([1,6500000])
+					.range([height - padding.top - padding.bottom, 0]);
+	var gdpScale = d3.scaleLog()
+					.domain([200,102000])
+					.range([0,10]);
+
+	var colors = ["#ccc","#C36A4D","#CD5551","#B6478B","#B650CD","#7D4AC3"]
+	var gdpColor = d3.scaleOrdinal()
+					.domain([NaN,2,4,6,8,10])
+					.range(colors);
+
+	var xAxis = d3.axisBottom().scale(popScale);
+	var yAxis = d3.axisLeft().scale(sizeScale);
+
+
+  	svg.append("g")
+        .attr("transform","translate(" + padding.left + "," + (height - padding.bottom) + ")")
+        .call(xAxis);
+            
+    svg.append("g")
+        .attr("transform","translate(" + padding.left + "," + padding.top + ")")
+        .call(yAxis);
+
+    	console.log(data);
+
+
+	for(var i=0; i<data.length; i++){
+	console.log(data[i].gdp);
+	console.log(gdpScale(data[i].gdp));
+	console.log(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2);
+		//round up to next even number
+	console.log(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2));
+		//color
+
+
+	svg.append("text")
+	.attr("x", popScale(data[i].population))
+	.attr("y", sizeScale(data[i].size))
+	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+	.text(data[i].name)
+	.style("fill", gdpColor(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2))); //round up to next even number
+
+	}
+}
+
+
+
+
+</script>
+
+
+
+</body>
+</html>
