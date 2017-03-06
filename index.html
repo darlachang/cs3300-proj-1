@@ -1,37 +1,38 @@
 <html>
 <head>
 <title>Project1</title>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
 <link href="https://fonts.googleapis.com/css?family=Alegreya|Alegreya+Sans" rel="stylesheet">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
 <script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="http://d3js.org/topojson.v2.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
 <style>
-
+body { font-family: 'Alegreya Sans', Calibri, sans-serif; }
 svg { border: solid #ccc 1px; }
-
+path.country { fill: #ddd; stroke: #ddd; opacity: 0.3 }
 </style>
 </head>
 <body>
-<div>
 
 <svg>
 </svg>
 
 <script>
-var svg = d3.select("svg");
+
+var svg = d3.select("svg").attr("width", 1500).attr("height",1000);
 
 var padding = {left:20, right: 80, top:80, bottom:20};
-
-var width = 1200;
 var countryData;
-var height = 100*100;
+var longScale = d3.scaleLinear()
+				.domain([-140,180])
+				.range([0,1400]);
+var latScale = d3.scaleLinear()
+				.domain([-70,70])
+				.range([1000,0]);
 
-svg.attr("width", width)
-   .attr("height", height);
 
 d3.tsv("country.tsv", function (error, data) {
 	if(error) { console.log(error);}
-
 
 	countryData = data.map(function(d){
 		country = d.Country;
@@ -39,20 +40,22 @@ d3.tsv("country.tsv", function (error, data) {
 		size = d.landSqMi;
 		best = d.numOneFor;
 		gdp = d.GDP;
-		gdpcapita=d.GDPperCapita;
+		gdpcapita= d.GDPperCapita;
+		longEW = d.longEW;
+		latNS = d.latNS;
 		return {"name":country, 
 		"pop": population,
 		"best": best,
 		"gdp": gdp,
-		"gdpcapita": gdpcapita};
+		"gdpcapita": gdpcapita,
+		"long" : longEW,
+		"lat" : latNS };
 	});
 
 	countryData = countryData.filter(function (d) {return +d.gdp !=0;})
-	console.log("countryData",countryData);
 	showBubble(countryData);
 
 });
-
 
 function showBubble(data){
 
@@ -69,18 +72,21 @@ function showBubble(data){
 					.range(colors);
 
 	for(var i=0; i<data.length; i++){
+	console.log(data[i].name + " long : " + longScale(data[i].long) + " no scale " + data[i].long);
+	console.log(data[i].name + " lat : " + latScale(data[i].lat)+ " no scale " + data[i].lat);
 
 	svg.append("circle")
-	.attr("cx", 200*parseInt(i%5)+80)
-	.attr("cy", parseInt(i/5)*160)
+	.attr("cx", longScale(data[i].long))
+	.attr("cy", latScale(data[i].lat))
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].name)
 	.attr("r",gdpScale(data[i].gdp))
+	.style("opacity", 0.4)
 	.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
 
 	svg.append("text")
-	.attr("x", 200*parseInt(i%5)+80)
-	.attr("y", parseInt(i/5)*160)
+	.attr("x", longScale(data[i].long))
+	.attr("y", latScale(data[i].lat))
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].best)
 	.style("font-size",15)
@@ -89,8 +95,8 @@ function showBubble(data){
 	.style("fill", "black");
 
 	svg.append("text")
-	.attr("x", 200*parseInt(i%5)+80)
-	.attr("y", parseInt(i/5)*160+10)
+	.attr("x", longScale(data[i].long))
+	.attr("y", latScale(data[i].lat)+10)
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].name)
 	.style("text-anchor","middle")
@@ -98,11 +104,12 @@ function showBubble(data){
 	.style("fill", "black");
 
 //might need to group elements later!
-
-
 	}
 }
+
+
 </script>
+
 
 
 
