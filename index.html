@@ -2,6 +2,7 @@
 <head>
 <title>Project1</title>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+<link href="https://fonts.googleapis.com/css?family=Alegreya|Alegreya+Sans" rel="stylesheet">
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
 <style>
@@ -13,94 +14,90 @@ svg { border: solid #ccc 1px; }
 <body>
 <div>
 
-<svg height="900" width="900">
+<svg>
 </svg>
 
 <script>
-var height = 900;
-var width = 900;
-var padding = {left:20, right: 80, top:80, bottom:20};
 var svg = d3.select("svg");
-var countryData;
 
+var padding = {left:20, right: 80, top:80, bottom:20};
+
+var width = 1200;
+var countryData;
+var height = 100*100;
+
+svg.attr("width", width)
+   .attr("height", height);
 
 d3.tsv("country.tsv", function (error, data) {
 	if(error) { console.log(error);}
-	console.log("csv")
+
+
 	countryData = data.map(function(d){
 		country = d.Country;
 		population = d.pop2015;
 		size = d.landSqMi;
 		best = d.numOneFor;
-		gdp = d.GDPperCapita;
+		gdp = d.GDP;
+		gdpcapita=d.GDPperCapita;
 		return {"name":country, 
-		"population": population,
-		"size": size,
+		"pop": population,
+		"best": best,
 		"gdp": gdp,
-		"best": best };
+		"gdpcapita": gdpcapita};
 	});
+
+	countryData = countryData.filter(function (d) {return +d.gdp !=0;})
 	console.log("countryData",countryData);
-	showTrend(countryData);
+	showBubble(countryData);
 
 });
 
 
-function showTrend(data){
+function showBubble(data){
 
-	var popScale = d3.scaleLog().domain([1,1500000]).range([0, width - padding.left - padding.right]);
-	var sizeScale = d3.scaleLog()
-					.domain([1,6500000])
-					.range([height - padding.top - padding.bottom, 0]);
-	var gdpScale = d3.scaleLog()
-					.domain([200,102000])
+	var gdpScale = d3.scaleLinear()
+					.domain([984074074,18036648000000])
+					.range([30,120]);
+	var gdpCapScale = d3.scaleLinear()
+					.domain([277,101450])
 					.range([0,10]);
-//log scale makes it legible but the data is misleading:(
-	var colors = ["#ccc","#C36A4D","#CD5551","#B6478B","#B650CD","#7D4AC3","#C9A2CD"]
-	var gdpColor = d3.scaleOrdinal()
-					.domain([NaN,0,2,4,6,8,10])
+
+	var colors = ["#f0f9e8","#ccebc5","#a8ddb5","#7bccc4","#43a2ca","#0868ac"]
+	var gdpCapColor = d3.scaleOrdinal()
+					.domain([0,2,4,6,8,10])
 					.range(colors);
 
-	var xAxis = d3.axisBottom().scale(popScale);
-	var yAxis = d3.axisLeft().scale(sizeScale);
-
-
-  	svg.append("g")
-        .attr("transform","translate(" + padding.left + "," + (height - padding.bottom) + ")")
-        .call(xAxis);
-            
-    svg.append("g")
-        .attr("transform","translate(" + padding.left + "," + padding.top + ")")
-        .call(yAxis);
-
-    	console.log(data);
-
-
 	for(var i=0; i<data.length; i++){
-	console.log(data[i].gdp);
-	console.log(gdpScale(data[i].gdp));
-	console.log(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2);
-		//round up to next even number
-	console.log(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2));
-		//color
 
-
-	svg.append("text")
-	.attr("x", popScale(data[i].population))
-	.attr("y", sizeScale(data[i].size))
+	svg.append("circle")
+	.attr("cx", 200*parseInt(i%5)+80)
+	.attr("cy", parseInt(i/5)*160)
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].name)
-	.style("font-size","11px")
-	.style("fill", gdpColor(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2))); //round up to next even number
-
+	.attr("r",gdpScale(data[i].gdp))
+	.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
 
 	svg.append("text")
-	.attr("x", popScale(data[i].population))
-	.attr("y", sizeScale(data[i].size)-7)
+	.attr("x", 200*parseInt(i%5)+80)
+	.attr("y", parseInt(i/5)*160)
 	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 	.text(data[i].best)
-	.style("font-size","11px")
-	.style("fill", gdpColor(gdpColor(Math.floor(gdpScale(data[i].gdp))+Math.floor(gdpScale(data[i].gdp))%2)));
+	.style("font-size",15)
+	.style("font-family","Alegreya")
+	.style("text-anchor","middle")
+	.style("fill", "black");
 
+	svg.append("text")
+	.attr("x", 200*parseInt(i%5)+80)
+	.attr("y", parseInt(i/5)*160+10)
+	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+	.text(data[i].name)
+	.style("text-anchor","middle")
+	.style("font-size",10)
+	.style("fill", "black");
+
+//might need to group elements later!
 
 
 	}
