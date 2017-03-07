@@ -7,29 +7,43 @@
 <script src="http://d3js.org/topojson.v2.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
 <style>
-body { font-family: 'Alegreya Sans', Calibri, sans-serif; }
-svg { border: solid #ccc 1px; }
-path.country { fill: #ddd; stroke: #ddd; opacity: 0.3 }
+body { background-color : transparent; font-family: 'Alegreya Sans', Calibri, sans-serif; }
+#svg { background-color : #FEFFF1; border: solid #ccc 1px; }
+svg.title { border: solid #fff 1px; background: black;}
+path.country { fill: #ccc; opacity: 0.9}
 </style>
 </head>
 <body>
 
-<svg>
+<svg class = title id = title2>
+	<svg class = title id =title1>
+	</svg>
+</svg>
+<br>
+<svg id = svg>
+
 </svg>
 
 <script>
 
-var svg = d3.select("svg").attr("width", 1500).attr("height",1000);
+var svg = d3.select("#svg").attr("width", 1800).attr("height",1000);
+var svg1 = d3.select("#title1").attr("width", 300).attr("height",200);
+var svg2 = d3.select("#title2").attr("width", 1800).attr("height",200);
 
 var padding = {left:20, right: 80, top:80, bottom:20};
 var countryData;
 var longScale = d3.scaleLinear()
-				.domain([-140,180])
-				.range([0,1400]);
+				.domain([-110,180])
+				.range([100,1750]);
 var latScale = d3.scaleLinear()
-				.domain([-70,70])
+				.domain([-55,65])
 				.range([1000,0]);
 
+var projection = d3.geoMercator().scale(50);
+var pathGenerator = d3.geoPath().projection(projection);
+
+var rawData;
+var countries;
 
 d3.tsv("country.tsv", function (error, data) {
 	if(error) { console.log(error);}
@@ -41,15 +55,16 @@ d3.tsv("country.tsv", function (error, data) {
 		best = d.numOneFor;
 		gdp = d.GDP;
 		gdpcapita= d.GDPperCapita;
-		longEW = d.longEW;
-		latNS = d.latNS;
+		xAxisCoor = d.xForY5;
+		yAxisCoor = d.yyy;
+		continent = d.continent;
 		return {"name":country, 
 		"pop": population,
 		"best": best,
 		"gdp": gdp,
 		"gdpcapita": gdpcapita,
-		"long" : longEW,
-		"lat" : latNS };
+		"long" : xAxisCoor,
+		"lat" : yAxisCoor };
 	});
 
 	countryData = countryData.filter(function (d) {return +d.gdp !=0;})
@@ -57,11 +72,13 @@ d3.tsv("country.tsv", function (error, data) {
 
 });
 
+
+
 function showBubble(data){
 
 	var gdpScale = d3.scaleLinear()
 					.domain([984074074,18036648000000])
-					.range([30,120]);
+					.range([20,130]);
 	var gdpCapScale = d3.scaleLinear()
 					.domain([277,101450])
 					.range([0,10]);
@@ -71,41 +88,62 @@ function showBubble(data){
 					.domain([0,2,4,6,8,10])
 					.range(colors);
 
-	for(var i=0; i<data.length; i++){
-	console.log(data[i].name + " long : " + longScale(data[i].long) + " no scale " + data[i].long);
-	console.log(data[i].name + " lat : " + latScale(data[i].lat)+ " no scale " + data[i].lat);
 
-	svg.append("circle")
-	.attr("cx", longScale(data[i].long))
-	.attr("cy", latScale(data[i].lat))
-	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-	.text(data[i].name)
-	.attr("r",gdpScale(data[i].gdp))
-	.style("opacity", 0.4)
-	.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
+	for (i = 0; i<data.length; i++){
 
-	svg.append("text")
-	.attr("x", longScale(data[i].long))
-	.attr("y", latScale(data[i].lat))
-	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-	.text(data[i].best)
-	.style("font-size",15)
-	.style("font-family","Alegreya")
-	.style("text-anchor","middle")
-	.style("fill", "black");
+		svg.append("circle")
+		.attr("cx", longScale(data[i].long))
+		.attr("cy", latScale(data[i].lat))
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.text(data[i].name)
+		.attr("r",gdpScale(data[i].gdp))
+		.style("opacity", 1.0)
+		.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
 
-	svg.append("text")
-	.attr("x", longScale(data[i].long))
-	.attr("y", latScale(data[i].lat)+10)
-	.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-	.text(data[i].name)
-	.style("text-anchor","middle")
-	.style("font-size",10)
-	.style("fill", "black");
+		svg.append("text")
+		.attr("x", longScale(data[i].long))
+		.attr("y", latScale(data[i].lat))
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.text(data[i].best)
+		.style("font-size",13)
+		.style("font-family","Alegreya")
+		.style("text-anchor","middle")
+		.style("fill", "black");
 
-//might need to group elements later!
+		svg.append("text")
+		.attr("x", longScale(data[i].long))
+		.attr("y", latScale(data[i].lat)+10)
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.text(data[i].name)
+		.style("text-anchor","middle")
+		.style("font-size",10)
+		.style("fill", "black");
 	}
+
 }
+
+d3.json("world-50m.json", function (error, data) { 
+	rawData = data;
+	countries = topojson.feature(rawData, rawData.objects.countries); 
+	showMap(countries);
+});
+
+
+function showMap(countries) {	
+
+	pathGenerator = d3.geoPath().projection(projection);
+	
+	var paths = svg1.selectAll("path.country").data(countries.features);
+
+	paths.enter().append("path").attr("class","country")
+	.merge(paths)
+	.attr("transform","translate(-330,-145)")
+	.attr("d", function(country){
+		return pathGenerator(country);
+	}); 
+
+}
+
 
 
 </script>
