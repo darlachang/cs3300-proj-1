@@ -174,7 +174,7 @@ function showBubble(data){
 		.attr("x", 1610)
 		.attr("y", 207)
 		.text("min")
-		.style("font-size",12)
+		.style("font-size",13)
 		.style("font-family","Alegreya")
 		.style("fill", "black");
 
@@ -182,7 +182,7 @@ function showBubble(data){
 		.attr("x", 1750)
 		.attr("y", 207)
 		.text("max")
-		.style("font-size",12)
+		.style("font-size",13)
 		.style("font-family","Alegreya")
 		.style("fill", "black");
 
@@ -344,6 +344,21 @@ function showBubble2(data){
 		.style("opacity", 0.7)
 		.style("fill", "#9e9ac8");
 
+		svg3.append("text")
+		.attr("x", 1610)
+		.attr("y", 207)
+		.text("min")
+		.style("font-size",13)
+		.style("font-family","Alegreya")
+		.style("fill", "black");
+
+		svg3.append("text")
+		.attr("x", 1750)
+		.attr("y", 207)
+		.text("max")
+		.style("font-size",13)
+		.style("font-family","Alegreya")
+		.style("fill", "black");
 
 	/////add legend start d3v4///
 	    var linear = d3.scaleLinear()
