@@ -10,9 +10,9 @@
 
 <style>
 body { background-color : transparent; font-family: 'Alegreya Sans', Calibri, sans-serif; }
-#svg { /*background-color : #FEFFF1*/; border: solid #ccc 1px; }
-svg.title { border: solid #fff 1px; background: black;}
-path.country { fill: #ccc; opacity: 0.9}
+#svg { background-color : #F5FFFA; border: solid #ccc 1px; }
+svg.title { border: solid #fff 1px; background: white;}
+path.country { fill: #aaa; opacity: 0.1}
 </style>
 </head>
 <body>
@@ -41,7 +41,7 @@ var latScale = d3.scaleLinear()
 				.domain([-55,65])
 				.range([1000,0]);
 
-var projection = d3.geoMercator().scale(50);
+var projection = d3.geoMercator().scale(350).center([-96,65]);
 var pathGenerator = d3.geoPath().projection(projection);
 
 var rawData;
@@ -92,6 +92,7 @@ function showBubble(data){
 
 
 	for (i = 0; i<data.length; i++){
+		var wordLength = data[i].best.split(" ").length;
 
 		svg.append("circle")
 		.attr("cx", longScale(data[i].long))
@@ -101,20 +102,23 @@ function showBubble(data){
 		.attr("r",gdpScale(data[i].gdp))
 		.style("opacity", 1.0)
 		.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
+		
 
+		for (j=0; j<wordLength; j++){ //break text for long "Number Ones"
+			svg.append("text")
+			.attr("x", longScale(data[i].long))
+			.attr("y", (latScale(data[i].lat)+j * 11)-5)
+			.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+			.text(data[i].best.split(" ")[j])
+			.style("font-size",13)
+			.style("font-family","Alegreya")
+			.style("text-anchor","middle")
+			.style("fill", "black");
+		}
+		
 		svg.append("text")
 		.attr("x", longScale(data[i].long))
-		.attr("y", latScale(data[i].lat))
-		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
-		.text(data[i].best)
-		.style("font-size",13)
-		.style("font-family","Alegreya")
-		.style("text-anchor","middle")
-		.style("fill", "black");
-
-		svg.append("text")
-		.attr("x", longScale(data[i].long))
-		.attr("y", latScale(data[i].lat)+10)
+		.attr("y", (latScale(data[i].lat)+wordLength*10)-5)
 		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 		.text(data[i].name)
 		.style("text-anchor","middle")
@@ -128,33 +132,34 @@ function showBubble(data){
     .domain([0,10])
     .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
 
-    svg.append("g")
+    svg2.append("g")
     .attr("class", "legendLinear")
-    .attr("transform", "translate(20,20)");
+    .attr("transform", "translate(1320,60)");
 
     var legendLinear = d3.legendColor()
     .shapeWidth(30)
     .orient('horizontal')
     .scale(gdpCapColor);
 
-    svg.select(".legendLinear")
+    svg2.select(".legendLinear")
     .call(legendLinear);
 
      ////////
     var linearSize = d3.scaleLinear().domain([0,10]).range([10, 20]);
 
-    svg.append("g")
+    svg2.append("g")
     .attr("class", "legendSize")
-    .attr("transform", "translate(10, 80)");
+    .attr("transform", "translate(1313, 120)");
 
     var legendSize = d3.legendSize()
     .scale(linearSize)
     .shape('circle')
+    .cells(2)
     .shapePadding(0)
     .labelOffset(20)
     .orient('horizontal');
 
-    svg.select(".legendSize")
+    svg2.select(".legendSize")
     .call(legendSize);
          
           
@@ -162,6 +167,7 @@ function showBubble(data){
 	}
 
 }
+
 
 d3.json("world-50m.json", function (error, data) { 
 	rawData = data;
@@ -174,7 +180,7 @@ function showMap(countries) {
 
 	pathGenerator = d3.geoPath().projection(projection);
 	
-	var paths = svg1.selectAll("path.country").data(countries.features);
+	var paths = svg.selectAll("path.country").data(countries.features);
 
 	paths.enter().append("path").attr("class","country")
 	.merge(paths)
@@ -184,6 +190,7 @@ function showMap(countries) {
 	}); 
 
 }
+
 
 
 
