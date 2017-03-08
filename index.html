@@ -279,9 +279,15 @@ function showBubble2(data){
 		.style("font-size",9)
 		.style("fill", "black");
 
+////legend label
+		svg3.append("text")
+		.attr("x", 1000)
+		.attr("y", 60)
+		.text("GDP")
+		.style("font-size",9)
+		.style("fill", "black");
 
-
-				/////add legend start d3v4///
+	/////add legend start d3v4///
 	    var linear = d3.scaleLinear()
 	    .domain([0,10])
 	    .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
@@ -298,26 +304,8 @@ function showBubble2(data){
 	    svg3.select(".legendLinear")
 	    .call(legendLinear);
 
-	     ////////
-	    var linearSize = d3.scaleLinear().domain([0,10]).range([10, 20]);
-
-	    svg3.append("g")
-	    .attr("class", "legendSize")
-	    .attr("transform", "translate(1603, 120)");
-
-	    var legendSize = d3.legendSize()
-	    .scale(linearSize)
-	    .shape('circle')
-	    .cells(2)
-	    .shapePadding(0)
-	    .labelOffset(20)
-	    .orient('horizontal');
-
-	    svg2.select(".legendSize")
-	    .call(legendSize);
-         
-          
  /////add legend end////
+
 	}
 
 }
