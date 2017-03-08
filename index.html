@@ -11,26 +11,41 @@
 <style>
 body { background-color : transparent; font-family: 'Alegreya Sans', Calibri, sans-serif; }
 #svg { background-color : #F5FFFA; border: solid #ccc 1px; }
-svg.title { border: solid #fff 1px; background: white;}
+svg.title { border: solid #fff 1px; background: white; font-family: 'Impact', fill: black;}
 path.country { fill: #aaa; opacity: 0.1}
+#svgpop { background-color : #FFFFFA; border: solid #ccc 1px; }
+
 </style>
 </head>
 <body>
 
 <svg class = title id = title2>
-	<svg class = title id =title1>
-	</svg>
+1<text x="30" y="80" font-family="Impact" font-size="74px" fill="black">Every Country is Number One at Something</text>
+1<text x="30" y="120" font-family="Courier" font-size="22px" fill="red">Disclaimer! This is not a comprehensive list.</text>
+1<text x="50" y="140" font-family="Courier" font-size="22px" fill="#4d4d4d">We acknowledge that some countries are best at multiple things. Also what constitues 'best' and '#1' can be subjective.</text>
+1<text x="50" y="160" font-family="Courier" font-size="22px" fill="#4d4d4d">For this reason, the dataset may be biased.</text>
+1<text x="50" y="180" font-family="Courier" font-size="22px" fill="#4d4d4d">Original Dataset is from <a>informationisbeautiful.net</a>.</text>
+</text>
+
+
 </svg>
+
 <br>
 <svg id = svg>
 
 </svg>
-
+<br>
+<br>
+<br>
+<svg id = svgpop>
+</svg>
 <script>
 
 var svg = d3.select("#svg").attr("width", 1800).attr("height",1000);
-var svg1 = d3.select("#title1").attr("width", 300).attr("height",200);
 var svg2 = d3.select("#title2").attr("width", 1800).attr("height",200);
+var svg3 = d3.select("#svgpop").attr("width", 1800).attr("height",1000);
+
+var svg5 = d3.select("#title4").attr("width", 1800).attr("height",200);
 
 var padding = {left:20, right: 80, top:80, bottom:20};
 var countryData;
@@ -53,6 +68,7 @@ d3.tsv("country.tsv", function (error, data) {
 	countryData = data.map(function(d){
 		country = d.Country;
 		population = d.pop2015;
+		popden = d.density;
 		size = d.landSqMi;
 		best = d.numOneFor;
 		gdp = d.GDP;
@@ -66,22 +82,25 @@ d3.tsv("country.tsv", function (error, data) {
 		"gdp": gdp,
 		"gdpcapita": gdpcapita,
 		"long" : xAxisCoor,
-		"lat" : yAxisCoor };
+		"lat" : yAxisCoor,
+		"popden" : popden };
 	});
 
 	countryData = countryData.filter(function (d) {return +d.gdp !=0;})
 	showBubble(countryData);
+	showBubble2(countryData);
 
 });
 
 
 
 function showBubble(data){
+	var popScale = d3.scaleLinear().domain([1,1367486]).range([20, 120]);
 
 	var gdpScale = d3.scaleLinear()
 					.domain([984074074,18036648000000])
 					.range([20,130]);
-	var gdpCapScale = d3.scaleLinear()
+	var gdpCapScale = d3.scaleLog()
 					.domain([277,101450])
 					.range([0,10]);
 
@@ -93,6 +112,7 @@ function showBubble(data){
 
 	for (i = 0; i<data.length; i++){
 		var wordLength = data[i].best.split(" ").length;
+		var fontsize = gdpScale(data[i].gdp)/10+10;
 
 		svg.append("circle")
 		.attr("cx", longScale(data[i].long))
@@ -100,17 +120,17 @@ function showBubble(data){
 		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 		.text(data[i].name)
 		.attr("r",gdpScale(data[i].gdp))
-		.style("opacity", 1.0)
+		.style("opacity", 0.7)
 		.style("fill", gdpCapColor(Math.ceil(gdpCapScale(data[i].gdpcapita))+Math.ceil(gdpCapScale(data[i].gdpcapita))%2)); //round up to next even number
 		
 
 		for (j=0; j<wordLength; j++){ //break text for long "Number Ones"
 			svg.append("text")
 			.attr("x", longScale(data[i].long))
-			.attr("y", (latScale(data[i].lat)+j * 11)-5)
-			.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+			.attr("y", (latScale(data[i].lat)+j * fontsize)-5)
+			.attr("transform","translate(" + padding.left +"," + padding.top + ")")
 			.text(data[i].best.split(" ")[j])
-			.style("font-size",13)
+			.style("font-size",fontsize)
 			.style("font-family","Alegreya")
 			.style("text-anchor","middle")
 			.style("fill", "black");
@@ -118,49 +138,50 @@ function showBubble(data){
 		
 		svg.append("text")
 		.attr("x", longScale(data[i].long))
-		.attr("y", (latScale(data[i].lat)+wordLength*10)-5)
+		.attr("y", (latScale(data[i].lat)+wordLength*fontsize)-5)
 		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
 		.text(data[i].name)
 		.style("text-anchor","middle")
-		.style("font-size",10)
+		.style("font-size",9)
 		.style("fill", "black");
 
 
 
 				/////add legend start d3v4///
-    var linear = d3.scaleLinear()
-    .domain([0,10])
-    .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
+	    var linear = d3.scaleLinear()
+	    .domain([0,10])
+	    .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
 
-    svg2.append("g")
-    .attr("class", "legendLinear")
-    .attr("transform", "translate(1320,60)");
+	    svg.append("g")
+	    .attr("class", "legendLinear")
+	    .attr("transform", "translate(1600,60)");
 
-    var legendLinear = d3.legendColor()
-    .shapeWidth(30)
-    .orient('horizontal')
-    .scale(gdpCapColor);
+	    var legendLinear = d3.legendColor()
+	    .shapeWidth(30)
+	    .orient('horizontal')
+	    .cells(6)
+	    .scale(gdpCapColor);
 
-    svg2.select(".legendLinear")
-    .call(legendLinear);
+	    svg.select(".legendLinear")
+	    .call(legendLinear);
 
-     ////////
-    var linearSize = d3.scaleLinear().domain([0,10]).range([10, 20]);
+	     ////////
+	    var linearSize = d3.scaleLinear().domain([0,10]).range([10, 20]);
 
-    svg2.append("g")
-    .attr("class", "legendSize")
-    .attr("transform", "translate(1313, 120)");
+	    svg.append("g")
+	    .attr("class", "legendSize")
+	    .attr("transform", "translate(1603, 120)");
 
-    var legendSize = d3.legendSize()
-    .scale(linearSize)
-    .shape('circle')
-    .cells(2)
-    .shapePadding(0)
-    .labelOffset(20)
-    .orient('horizontal');
+	    var legendSize = d3.legendSize()
+	    .scale(linearSize)
+	    .shape('circle')
+	    .cells(2)
+	    .shapePadding(0)
+	    .labelOffset(20)
+	    .orient('horizontal');
 
-    svg2.select(".legendSize")
-    .call(legendSize);
+	    svg.select(".legendSize")
+	    .call(legendSize);
          
           
  /////add legend end////
@@ -181,8 +202,17 @@ function showMap(countries) {
 	pathGenerator = d3.geoPath().projection(projection);
 	
 	var paths = svg.selectAll("path.country").data(countries.features);
+	var paths2 = svg3.selectAll("path.country").data(countries.features);
 
 	paths.enter().append("path").attr("class","country")
+	.merge(paths)
+	.attr("transform","translate(-330,-145)")
+	.attr("d", function(country){
+		return pathGenerator(country);
+	}); 
+
+
+	paths2.enter().append("path").attr("class","country")
 	.merge(paths)
 	.attr("transform","translate(-330,-145)")
 	.attr("d", function(country){
@@ -196,6 +226,108 @@ function showMap(countries) {
 
 </script>
 
+
+<script>
+
+
+
+function showBubble2(data){
+	var popScale = d3.scaleLinear().domain([1,1367486]).range([20, 100]);
+
+	var popDenScale = d3.scaleLinear()
+					.domain([0,100,500,1000,5000,21416])
+					.range([0,2,4,6,8,10]);
+
+	var colors = ["#f2f0f7","#dadaeb","#bcbddc","#9e9ac8","#756bb1", "#54278f"]
+	var popDenColor = d3.scaleOrdinal()
+					.domain([0,2,4,6,8,10])
+					.range(colors);
+
+
+	for (i = 0; i<data.length; i++){
+		var wordLength = data[i].best.split(" ").length;
+		var fontsize = popScale(data[i].pop)/10+10;
+
+		svg3.append("circle")
+		.attr("cx", longScale(data[i].long))
+		.attr("cy", latScale(data[i].lat))
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.text(data[i].name)
+		.attr("r",popScale(data[i].pop))
+		.style("opacity", 0.7)
+		.style("fill", popDenColor(Math.ceil(popDenScale(data[i].popden))+Math.ceil(popDenScale(data[i].popden))%2)); //round up to next even number
+		
+
+		for (j=0; j<wordLength; j++){ //break text for long "Number Ones"
+			svg3.append("text")
+			.attr("x", longScale(data[i].long))
+			.attr("y", (latScale(data[i].lat)+j * fontsize)-5)
+			.attr("transform","translate(" + padding.left +"," + padding.top + ")")
+			.text(data[i].best.split(" ")[j])
+			.style("font-size",fontsize)
+			.style("font-family","Alegreya")
+			.style("text-anchor","middle")
+			.style("fill", "black");
+		}
+		
+		svg3.append("text")
+		.attr("x", longScale(data[i].long))
+		.attr("y", (latScale(data[i].lat)+(wordLength-1)*fontsize)+3)
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.text(data[i].name)
+		.style("text-anchor","middle")
+		.style("font-size",9)
+		.style("fill", "black");
+
+
+
+				/////add legend start d3v4///
+	    var linear = d3.scaleLinear()
+	    .domain([0,10])
+	    .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
+
+	    svg3.append("g")
+	    .attr("class", "legendLinear")
+	    .attr("transform", "translate(1600,60)");
+
+	    var legendLinear = d3.legendColor()
+	    .shapeWidth(30)
+	    .orient('horizontal')
+	    .scale(popDenColor);
+
+	    svg3.select(".legendLinear")
+	    .call(legendLinear);
+
+	     ////////
+	    var linearSize = d3.scaleLinear().domain([0,10]).range([10, 20]);
+
+	    svg3.append("g")
+	    .attr("class", "legendSize")
+	    .attr("transform", "translate(1603, 120)");
+
+	    var legendSize = d3.legendSize()
+	    .scale(linearSize)
+	    .shape('circle')
+	    .cells(2)
+	    .shapePadding(0)
+	    .labelOffset(20)
+	    .orient('horizontal');
+
+	    svg2.select(".legendSize")
+	    .call(legendSize);
+         
+          
+ /////add legend end////
+	}
+
+}
+
+
+
+
+
+
+</script>
 
 
 
