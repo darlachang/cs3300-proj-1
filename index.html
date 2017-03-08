@@ -146,7 +146,7 @@ function showBubble(data){
 		.style("fill", "black");
 
 ////legend label
-		svg3.append("text")
+		svg.append("text")
 		.attr("x", 1000)
 		.attr("y", 60)
 		.text("GDP")
@@ -302,13 +302,30 @@ function showBubble2(data){
 		.style("font-size",9)
 		.style("fill", "black");
 
-////legend label
+		////legend label
 		svg3.append("text")
 		.attr("x", 1000)
 		.attr("y", 60)
 		.text("GDP")
 		.style("font-size",9)
 		.style("fill", "black");
+
+		svg3.append("circle")
+		.attr("cx", 1000)
+		.attr("cy", 80)
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.attr("r",20)
+		.style("opacity", 0.7)
+		.style("fill", "#a1d99b");
+
+		svg3.append("circle")
+		.attr("cx", 1400)
+		.attr("cy", 80)
+		.attr("transform","translate(" + padding.left + "," + padding.top + ")")
+		.attr("r",130)
+		.style("opacity", 0.7)
+		.style("fill", "#a1d99b");
+
 
 	/////add legend start d3v4///
 	    var linear = d3.scaleLinear()
